@@ -6,7 +6,8 @@ import "D:/Projekt Reaktywne/projekt-reaktywne/src/assets/card.css";
 import Box from "@mui/material/Box";
 import Rating from "@mui/material/Rating";
 import Typography from "@mui/material/Typography";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const labels = {
   0.5: "Useless",
@@ -21,14 +22,27 @@ const labels = {
   5: "Excellent+",
 };
 
-const Myfilmcard = () => {
+const Myfilmcard = (props) => {
   const [value, setValue] = React.useState(0);
   const [hover, setHover] = React.useState(-1);
+  const nav = useNavigate();
+
+  function deleteFilm() {
+    axios
+      .delete(`https://at.usermd.net/api/movie/${props.id}`)
+      .then((response) => {
+        console.log(response);
+        window.location.reload();
+      });
+  }
+
   return (
     <div className="card">
       <img
         className="card-img-top"
-        src={require("../assets/logo.png")}
+        src={props.img}
+        width="auto"
+        height="300px"
         alt="Card image cap"
       ></img>
       <span id="rateMe3" className="rating-faces"></span>
@@ -46,11 +60,13 @@ const Myfilmcard = () => {
             }}
           />
         </Box>
-        <h5 className="card-title">Tytuł filmu</h5>
-        <h6 className="card-subtitle mb-2 text-muted">gatunek</h6>
-        <Link to="/details">
+        <h5 className="card-title" style={{ wordWrap: "wrap", width: "250px" }}>
+          {props.title}
+        </h5>
+        <Link to={`/details/${props.id}`}>
           <p className="card-text">Opis.</p>
         </Link>
+        <button onClick={deleteFilm}>Usuń</button>
       </div>
     </div>
   );

@@ -2,11 +2,26 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../assets/navbar.css";
 import { Link, useLocation } from "react-router-dom";
 import { React } from "react";
+import { decodeToken, isExpired } from "react-jwt";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Mynavbar = () => {
   const path = useLocation();
-
+  const isLogged = !isExpired(localStorage.getItem("token"));
+  const nav = useNavigate();
   let navbar;
+  function logOut() {
+    const token = decodeToken(localStorage.getItem("token"));
+    axios({
+      method: "delete",
+      url: `https://at.usermd.net/api/user/logout/${token.userId}`,
+      data: { userId: token.userId },
+    }).then((response) => {
+      localStorage.removeItem("token");
+      nav("/");
+    });
+  }
   const currentPath = window.location.pathname;
   if (path.pathname === "/") {
     console.log(window.location);
@@ -21,18 +36,28 @@ const Mynavbar = () => {
           <Link to="/">
             <button>Home</button>
           </Link>
+          {isLogged && (
+            <Link to="/add">
+              <button>Dodaj film</button>
+            </Link>
+          )}
         </nav>
-        <form className="search-form">
-          <input type="text" placeholder="Search..." />
-          <button type="submit">Search</button>
-        </form>
         <div className="right-actions">
-          <Link to="/signin">
-            <button href="#">Login</button>
-          </Link>
-          <Link to="/signup">
-            <button>Sign up</button>
-          </Link>
+          {isLogged && (
+            <button href="#" onClick={logOut}>
+              Wyloguj
+            </button>
+          )}
+          {!isLogged && (
+            <>
+              <Link to="/signin">
+                <button href="#">Login</button>
+              </Link>
+              <Link to="/signup">
+                <button>Sign up</button>
+              </Link>
+            </>
+          )}
         </div>
       </header>
     );
@@ -51,9 +76,16 @@ const Mynavbar = () => {
           </Link>
         </nav>
         <div className="right-actions">
-          <Link to="/signup">
-            <button>Sign up</button>
-          </Link>
+          {isLogged && (
+            <button href="#" onClick={logOut}>
+              Wyloguj
+            </button>
+          )}
+          {!isLogged && (
+            <Link to="/signup">
+              <button>Sign up</button>
+            </Link>
+          )}
         </div>
       </header>
     );
@@ -72,13 +104,20 @@ const Mynavbar = () => {
           </Link>
         </nav>
         <div className="right-actions">
-          <Link to="/signin">
-            <button href="#">Login</button>
-          </Link>
+          {isLogged && (
+            <button href="#" onClick={logOut}>
+              Wyloguj
+            </button>
+          )}
+          {!isLogged && (
+            <Link to="/signin">
+              <button href="#">Login</button>
+            </Link>
+          )}
         </div>
       </header>
     );
-  } else if (currentPath === "/details") {
+  } else {
     console.log(window.location);
     navbar = (
       <header>
@@ -93,12 +132,11 @@ const Mynavbar = () => {
           </Link>
         </nav>
         <div className="right-actions">
-          <Link to="/signin">
-            <button href="#">Login</button>
-          </Link>
-          <Link to="/signup">
-            <button>Sign up</button>
-          </Link>
+          {isLogged && (
+            <button href="#" onClick={logOut}>
+              Wyloguj
+            </button>
+          )}
         </div>
       </header>
     );
